@@ -37,7 +37,7 @@ sudo chmod u=rwx,g=rx,o= /var/lib/webgen /var/lib/webgen/HTML
 
 - Using sftp you can transfer the file from your local machine:
 ```bash
-put "path\to\generate_index"
+put path/to/generate_index
 ```
 - Then you can move it to `/var/lib/webgen/bin/` using:
 ```bash
@@ -88,6 +88,79 @@ put /path/to/webgen
 - Then move them to the correct directories:
 ```bash
 sudo mv nginx.conf /etc/nginx/
+sudo mv webgen /etc/nginx/sites-available
+```
+- You can now enable the site by creating a symlink:
+```bash
+sudo ln -s /etc/nginx/sites-available/webgen /etc/nginx/sites-enabled/
+```
+- Once that's done, you will need to reload `nginx`:
+```bash
+sudo systemctl reload nginx
+```
+- You can also check the status of `nginx` to make sure it is running as expected:
+```bash
+sudo systemctl status nginx
+```
+- You can also test the `nginx` configuration by using the following:
+```bash
+sudo nginx -t
+```
+## Configuring UFW
+Make sure to install `ufw` or update your server if you haven't recently:
+```bash
+sudo pacman -S ufw
+```
+- Now you can configure `ufw` using the following commands: 
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw limit shh
+sudo systemctl enable --now ufw.service
+```
+- Once you have done that you can enable `ufw`:
+```bash
+sudo ufw enable
+```
+- To check the status you can use:
+```bash
+sudo ufw status verbose
 ```
 
+## Enhancing the `generate_index` Script
+1. Adding a check to ensure that the script receives exactly one argument
+```bash
+if [ "$#" -ne 1 ]; then
+    echo "Error: Exactly one output directory argument is required."
+    echo "Try: $0 <output-directory>"
+    exit 1
+fi
+```
+If no arguments or more than one is provided, the script will display an error message and exit. This prevents further execution with invalid input. This helps to avoid unexpected behavior like using an undefined or incorrect directory.
+**Reference:https://unix.stackexchange.com/questions/506719/taking-input-in-a-script-and-making-sure-theres-only-one-parameter**
 
+2. Disk Usage
+**Initial Attempt:**
+```bash
+DISK_USAGE=$(df -h / | awk 'NR==1 {print $3 " used out of " $2}')
+```
+The line was incorrectly retrieving the first row (NR==1) from the `df` output, giving me the header instead of the actual disk usage information. This resulted in unwanted output. I changed the `NR==1` to `NR==2` in the `awk` command to then get the correct line.
+
+```bash
+DISK_USAGE=$(df -h / | awk 'NR==2 {print $3 " used out of " $2}')
+```
+**Reference:man fd, and man awk**
+
+3. Memory Usage
+**Initial Attempt:**
+```bash
+MEMORY_USAGE=$(free -h | awk '/^Memory/ {print $3 " used out of " $2}')
+```
+The regular expression `/^Memory/` did not match anything because the actual output of the `free` command uses `Mem:` instead of `Memory`. This resulted in no output from the awk command. I changed the regular expression to `/^Mem:/` to match the correct line in the output of the `free` command.
+
+```bash
+MEMORY_USAGE=$(free -h | awk '/^Mem:/ {print $3 " used out of " $2}')
+```
+**Reference:man free, and man awk**
