@@ -139,9 +139,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 ```
-**Reference:https://unix.stackexchange.com/questions/506719/taking-input-in-a-script-and-making-sure-theres-only-one-parameter**
+**Reference: https://unix.stackexchange.com/questions/506719/taking-input-in-a-script-and-making-sure-theres-only-one-parameter**
 
-2. Disk Usage
+2. Disk Usage\
 **Initial Attempt:**
 ```bash
 DISK_USAGE=$(df -h / | awk 'NR==1 {print $3 " used out of " $2}')
@@ -151,9 +151,9 @@ The line was incorrectly retrieving the first row (NR==1) from the `df` output, 
 ```bash
 DISK_USAGE=$(df -h / | awk 'NR==2 {print $3 " used out of " $2}')
 ```
-**Reference:man fd, and man awk**
+**Reference: man fd, and man awk**
 
-3. Memory Usage
+3. Memory Usage\
 **Initial Attempt:**
 ```bash
 MEMORY_USAGE=$(free -h | awk '/^Memory/ {print $3 " used out of " $2}')
@@ -163,4 +163,4 @@ The regular expression `/^Memory/` did not match anything because the actual out
 ```bash
 MEMORY_USAGE=$(free -h | awk '/^Mem:/ {print $3 " used out of " $2}')
 ```
-**Reference:man free, and man awk**
+**Reference: man free, and man awk**
