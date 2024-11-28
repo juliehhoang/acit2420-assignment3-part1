@@ -131,6 +131,7 @@ sudo ufw status verbose
 
 ## Enhancing the `generate_index` Script
 1. Adding a check to ensure that the script receives exactly one argument
+If no arguments or more than one is provided, the script will display an error message and exit. This prevents further execution with invalid input. This helps to avoid unexpected behavior like using an undefined or incorrect directory.
 ```bash
 if [ "$#" -ne 1 ]; then
     echo "Error: Exactly one output directory argument is required."
@@ -138,7 +139,6 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 ```
-If no arguments or more than one is provided, the script will display an error message and exit. This prevents further execution with invalid input. This helps to avoid unexpected behavior like using an undefined or incorrect directory.
 **Reference:https://unix.stackexchange.com/questions/506719/taking-input-in-a-script-and-making-sure-theres-only-one-parameter**
 
 2. Disk Usage
